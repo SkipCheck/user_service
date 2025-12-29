@@ -5,6 +5,7 @@ import com.aston.exception.UserException;
 import com.aston.utils.HibernateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.query.Query;
@@ -15,6 +16,17 @@ import java.util.Optional;
 
 @Slf4j
 public class UserDaoImpl implements UserDao{
+
+    private final SessionFactory sessionFactory;
+
+    public UserDaoImpl() {
+        this.sessionFactory = HibernateUtil.getSessionFactory();
+    }
+
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     @Override
     public User save(User user) {
         Transaction transaction = null;
@@ -128,11 +140,6 @@ public class UserDaoImpl implements UserDao{
 
             User user = session.get(User.class, id);
 
-            if (user == null) {
-                log.warn("Пользователь с ID {} не найден", id);
-                throw new UserException("Пользователь не найден");
-            }
-
             session.delete(user);
             log.info("Пользователь удален с ID: {}", id);
 
@@ -176,6 +183,6 @@ public class UserDaoImpl implements UserDao{
     }
 
     private Session getSession() {
-        return HibernateUtil.getSessionFactory().openSession();
+        return sessionFactory.openSession();
     }
 }

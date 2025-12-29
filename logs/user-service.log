@@ -840,3 +840,15 @@ com.aston.exception.UserException: Пользователь не найден
 	at com.aston.service.UserService.deleteUser(UserService.java:75) [classes/:?]
 	at com.aston.Main.deleteUser(Main.java:227) [classes/:?]
 	at com.aston.Main.main(Main.java:47) [classes/:?]
+2025-12-30 01:26:12.642 [main] INFO  com.aston.service.UserService - Создание нового пользователя: name=у, email=e@gmail.com, age=12
+2025-12-30 01:26:12.671 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 5.6.15.Final
+2025-12-30 01:26:12.913 [main] INFO  org.hibernate.annotations.common.Version - HCANN000001: Hibernate Commons Annotations {5.1.2.Final}
+2025-12-30 01:26:12.988 [main] WARN  org.hibernate.orm.connections.pooling - HHH10001002: Using Hibernate built-in connection pool (not for production use!)
+2025-12-30 01:26:12.990 [main] INFO  org.hibernate.orm.connections.pooling - HHH10001005: using driver [org.postgresql.Driver] at URL [jdbc:postgresql://localhost:5432/projectdb]
+2025-12-30 01:26:12.991 [main] INFO  org.hibernate.orm.connections.pooling - HHH10001001: Connection properties: {password=****, autocommit=false, user=postgres}
+2025-12-30 01:26:12.991 [main] INFO  org.hibernate.orm.connections.pooling - HHH10001003: Autocommit mode: false
+2025-12-30 01:26:12.992 [main] INFO  org.hibernate.engine.jdbc.connections.internal.DriverManagerConnectionProviderImpl - HHH000115: Hibernate connection pool size: 10 (min=1)
+2025-12-30 01:26:13.104 [main] INFO  org.hibernate.dialect.Dialect - HHH000400: Using dialect: org.hibernate.dialect.PostgreSQL10Dialect
+2025-12-30 01:26:13.446 [main] INFO  org.hibernate.orm.connections.access - HHH10001501: Connection obtained from JdbcConnectionAccess [org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess@ebda593] for (non-JTA) DDL execution was not in auto-commit mode; the Connection 'local transaction' will be committed and the Connection will be set into auto-commit mode.
+2025-12-30 01:26:13.460 [main] INFO  org.hibernate.engine.transaction.jta.platform.internal.JtaPlatformInitiator - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform]
+2025-12-30 01:28:12.306 [main] INFO  com.aston.service.UserService - Поиск пользователя по email: e@gmail.com
