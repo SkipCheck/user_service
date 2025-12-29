@@ -13,7 +13,7 @@ import java.util.Optional;
 @Slf4j
 public class UserService {
 
-    private final UserDao userDao;
+    private UserDao userDao;
 
     public UserService() {
         this.userDao = new UserDaoImpl();
@@ -23,6 +23,10 @@ public class UserService {
         log.info("Создание нового пользователя: name={}, email={}, age={}", name, email, age);
 
         validateUserData(name, email, age);
+
+        if (userDao.existsByEmail(email)) {
+            throw new UserException("Пользователь с email '" + email + "' уже существует");
+        }
 
         User user = User.builder()
                 .name(name)
@@ -60,6 +64,11 @@ public class UserService {
 
         validateUserData(name, email, age);
 
+        Optional<User> existingUser = userDao.findById(id);
+        if (existingUser.isEmpty()) {
+            throw new UserException("Пользователь с ID " + id + " не найден");
+        }
+
         User user = User.builder()
                 .id(id)
                 .name(name)
@@ -84,8 +93,13 @@ public class UserService {
             throw new UserException("Email не может быть пустым");
         }
 
+        String trimmedEmail = email.trim();
+
+        // Более строгая, но реалистичная валидация email
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+
         //валидация почты через регулярки
-        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (!trimmedEmail.matches(emailRegex)) {
             throw new UserException("Некорректный формат email");
         }
 
