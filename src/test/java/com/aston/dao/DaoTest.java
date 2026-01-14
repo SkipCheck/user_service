@@ -39,7 +39,7 @@ public class DaoTest {
     @BeforeEach
     public void setUp() {
         try (Session session = sessionFactory.openSession()) {
-            var tx = session.beginTransaction();
+            Transaction tx = session.beginTransaction();
             session.createNativeQuery("DELETE FROM users").executeUpdate();
             session.createNativeQuery("ALTER SEQUENCE IF EXISTS user_id_seq RESTART WITH 1").executeUpdate();
             tx.commit();
@@ -55,7 +55,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(1)
     @DisplayName("Сохранение пользователя - успех")
     public void save_User_ShouldSuccesfully(){
         User user = User.builder()
@@ -74,7 +73,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(2)
     @DisplayName("Сохранение пользователя с дублирующимся email - выброс исключения")
     void save_DuplicateEmail_ShouldThrowException() {
         User user1 = User.builder()
@@ -97,7 +95,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(3)
     @DisplayName("Поиск пользователя по id - существующий пользователь")
     void findById_ExistingUser_ShouldReturnUser() {
         User user = User.builder()
@@ -116,7 +113,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(4)
     @DisplayName("Поиск пользователя по id - несуществующий пользователь")
     void findById_NonExistingUser_ShouldReturnEmpty() {
         Optional<User> foundUser = userDao.findById(999L);
@@ -125,7 +121,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(5)
     @DisplayName("Получение всех пользователей - список пользователей")
     void findAll_ShouldReturnAllUsers() {
         User user1 = User.builder()
@@ -150,7 +145,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(6)
     @DisplayName("Поиск пользователей по имени - список пользователей с указаным именем")
     void findByName_ShouldReturnUsersByName() {
         User user1 = User.builder()
@@ -183,7 +177,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(7)
     @DisplayName("Поиск пользователя по email")
     void findByEmail_ExistingEmail_ShouldReturnUser() {
         User user = User.builder()
@@ -201,7 +194,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(8)
     @DisplayName("Поиск пользователя по email - несуществующий email")
     void findByEmail_NonExistingEmail_ShouldReturnEmpty() {
         Optional<User> foundUser = userDao.findByEmail("nonexistent@gmail.com");
@@ -210,7 +202,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(9)
     @DisplayName("Обновление пользователя - успешное обновление")
     void update_ValidUser_ShouldUpdateSuccessfully() {
         User user = User.builder()
@@ -230,7 +221,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(10)
     @DisplayName("Удаление пользователя по id - успех удалния")
     void delete_ExistingUser_ShouldDeleteSuccessfully() {
         User user = User.builder()
@@ -248,7 +238,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(11)
     @DisplayName("Удаление пользователя по id - исключение несуществующий пользователь")
     void delete_NonExistingUser_ShouldThrowException() {
         assertThatThrownBy(() -> userDao.delete(999L))
@@ -257,7 +246,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(12)
     @DisplayName("Проверка существования пользователя по id")
     void existsById_ShouldReturnCorrectResult() {
         User user = User.builder()
@@ -273,7 +261,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(13)
     @DisplayName("Проверка существования пользователя по email")
     void existsByEmail_ShouldReturnCorrectResult() {
         User user = User.builder()
@@ -289,7 +276,6 @@ public class DaoTest {
     }
 
     @Test
-    @Order(14)
     @DisplayName("Сохранение пользователя без возраста")
     void save_UserWithoutAge_ShouldSaveSuccessfully() {
         User user = User.builder()

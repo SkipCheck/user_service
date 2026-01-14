@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: PetProject
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/projectdb
+    username: postgres
+    password: 45a23s00D-
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        format_sql: true
+    generate-ddl: true
+
+  main:
+    banner-mode: off
+
+server:
+  port: 5665
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    com.aston: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

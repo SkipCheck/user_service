@@ -9,9 +9,9 @@ public class TestDatabaseConfig {
     static {
         postgresContainer = new PostgreSQLContainer<>("postgres:15-alpine")
                 .withDatabaseName("testdb")
-                .withUsername("test")        // Стандартное имя пользователя в Testcontainers
-                .withPassword("test")        // Стандартный пароль
-                .withReuse(true);           // Опционально: разрешаем повторное использование
+                .withUsername("test")
+                .withPassword("test")
+                .withReuse(true); // разрешаем повторное использование
     }
 
     public static void startContainer() {
@@ -36,10 +36,5 @@ public class TestDatabaseConfig {
 
     public static String getPassword() {
         return postgresContainer.getPassword();
-    }
-
-    // Опционально: метод для проверки состояния
-    public static boolean isContainerRunning() {
-        return postgresContainer != null && postgresContainer.isRunning();
     }
 }

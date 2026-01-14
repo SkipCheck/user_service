@@ -1,110 +1,180 @@
 package com.aston.service;
 
-import com.aston.dao.UserDao;
-import com.aston.dao.UserDaoImpl;
+import com.aston.dto.UserRequest;
+import com.aston.dto.UserResponse;
 import com.aston.entity.User;
 import com.aston.exception.UserException;
+import com.aston.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
+
+/**
+ * Сервисный слой приложения
+ *
+ * Бизнес-логика работы с пользователями
+ * Инкапуслирует работу с репозиторием и преобразованием DTO
+ */
 @Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
-    private UserDao userDao;
+    private final UserRepository userRepository;
 
-    public UserService() {
-        this.userDao = new UserDaoImpl();
+    /**
+     * Преобразует сущность user в DTO UserResponse
+     *
+     * @param user сущность пользователя
+     * @return DTO для ответа
+     */
+    private UserResponse convertToResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .age(user.getAge())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
+    /**
+     * Создание нового пользователя
+     *
+     * @param userRequest DTO с данными пользователя
+     * @return созданный пользователь в виде DTO
+     * @throws UserException если пользователь с таким email уже существует
+     */
+    @Transactional
+    public UserResponse createUser(UserRequest userRequest) {
+        log.info("Создание нового пользователя: name={}, email={}, age={}",
+                userRequest.getName(), userRequest.getEmail(), userRequest.getAge());
 
-    public User createUser(String name, String email, Integer age) {
-        log.info("Создание нового пользователя: name={}, email={}, age={}", name, email, age);
-
-        validateUserData(name, email, age);
-
-        if (userDao.existsByEmail(email)) {
-            throw new UserException("Пользователь с email '" + email + "' уже существует");
+        if (userRepository.existsByEmail(userRequest.getEmail())) {
+            throw new UserException("Пользователь с email '" + userRequest.getEmail() + "' уже существует");
         }
 
         User user = User.builder()
-                .name(name)
-                .email(email)
-                .age(age)
-                .createdAt(LocalDateTime.now())
+                .name(userRequest.getName())
+                .email(userRequest.getEmail())
+                .age(userRequest.getAge())
                 .build();
 
-        return userDao.save(user);
+        user = userRepository.save(user);
+
+        log.info("Пользователь создан: id={}, email={}", user.getId(), user.getEmail());
+        return convertToResponse(user);
     }
 
-    public Optional<User> getUserById(Long id) {
-        log.info("Получение пользователя по ID: {}", id);
-        return userDao.findById(id);
+    /**
+     * Получение пользователя по id
+     *
+     * @param id id пользователя
+     * @return пользователь в виде DTO
+     * @throws UserException если пользователь не найден
+     */
+    public UserResponse getUserById(Long id) {
+        log.debug("Получение пользователя по ID: {}", id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserException("Пользователь с ID " + id + " не найден"));
+
+        return convertToResponse(user);
     }
 
-    public List<User> getAllUsers() {
-        log.info("Получение всех пользователей");
-        return userDao.findAll();
+    /**
+     * Получение всех пользователей
+     *
+     * @return список всех пользователей
+     */
+    public List<UserResponse> getAllUsers() {
+        log.debug("Получение всех пользователей");
+
+        return userRepository.findAll().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
-    public List<User> getUsersByName(String name) {
-        log.info("Поиск пользователей по имени: {}", name);
-        return userDao.findByName(name);
+    /**
+     * Поиск пользователей по имени
+     *
+     * @param name имя или часть имени для поиска
+     * @return список найденных пользователей
+     */
+    public List<UserResponse> getUsersByName(String name) {
+        log.debug("Поиск пользователей по имени: {}", name);
+
+        return userRepository.findByNameContainingIgnoreCase(name).stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
     }
 
-    public Optional<User> getUserByEmail(String email) {
-        log.info("Поиск пользователя по email: {}", email);
-        return userDao.findByEmail(email);
+    /**
+     * Получение пользователя по email
+     *
+     * @param email email пользователя
+     * @return пользователь в виде DTO
+     * @throws UserException если пользователь не найден
+     */
+    public UserResponse getUserByEmail(String email) {
+        log.debug("Поиск пользователя по email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException("Пользователь с email " + email + " не найден"));
+
+        return convertToResponse(user);
     }
 
-    public User updateUser(Long id, String name, String email, Integer age) {
+    /**
+     * Обновление данных пользователя
+     *
+     * @param id ID пользователя для обновления
+     * @param userRequest новые данные пользователя
+     * @return обновленный пользователь в виде DTO
+     * @throws UserException если пользователь не найден или email уже занят другим пользователем
+     */
+    @Transactional
+    public UserResponse updateUser(Long id, UserRequest userRequest) {
         log.info("Обновление пользователя с ID {}: name={}, email={}, age={}",
-                id, name, email, age);
+                id, userRequest.getName(), userRequest.getEmail(), userRequest.getAge());
 
-        validateUserData(name, email, age);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserException("Пользователь с ID " + id + " не найден"));
 
-        Optional<User> existingUser = userDao.findById(id);
-        if (existingUser.isEmpty()) {
+        if (userRepository.existsByEmailAndIdNot(userRequest.getEmail(), id)) {
+            throw new UserException("Пользователь с email '" + userRequest.getEmail() + "' уже существует");
+        }
+
+        user.setName(userRequest.getName());
+        user.setEmail(userRequest.getEmail());
+        user.setAge(userRequest.getAge());
+
+        user = userRepository.save(user);
+
+        log.info("Пользователь обновлен: ID={}", id);
+        return convertToResponse(user);
+    }
+
+    /**
+     * Удаление пользователя
+     *
+     * @param id ID пользователя для удаления
+     * @throws UserException если пользователь не найден
+     */
+    @Transactional
+    public void deleteUser(Long id) {
+        log.info("Удаление пользователя с ID: {}", id);
+
+        if (!userRepository.existsById(id)) {
             throw new UserException("Пользователь с ID " + id + " не найден");
         }
 
-        User user = User.builder()
-                .id(id)
-                .name(name)
-                .email(email)
-                .age(age)
-                .build();
-
-        return userDao.update(user);
-    }
-
-    public void deleteUser(Long id) {
-        log.info("Удаление пользователя с ID: {}", id);
-        userDao.delete(id);
-    }
-
-    private void validateUserData(String name, String email, Integer age) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new UserException("Имя пользователя не может быть пустым");
-        }
-
-        if (email == null || email.trim().isEmpty()) {
-            throw new UserException("Email не может быть пустым");
-        }
-
-        String trimmedEmail = email.trim();
-
-        // Более строгая, но реалистичная валидация email
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-
-        //валидация почты через регулярки
-        if (!trimmedEmail.matches(emailRegex)) {
-            throw new UserException("Некорректный формат email");
-        }
-
-        if (age != null && (age < 0 || age > 150)) {
-            throw new UserException("Возраст должен быть от 0 до 150 лет");
-        }
+        userRepository.deleteById(id);
+        log.info("Пользователь удален: ID={}", id);
     }
 }

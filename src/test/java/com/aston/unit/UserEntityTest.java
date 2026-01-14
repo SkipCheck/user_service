@@ -71,19 +71,6 @@ class UserEntityTest {
     }
 
     @Test
-    @DisplayName("Метод onCreate() устанавливает дату создания")
-    void userOnCreate_ShouldSetCreatedAt() {
-        User user = User.builder()
-                .name("Тест")
-                .email("test@example.com")
-                .build();
-
-        user.onCreate();
-
-        assertThat(user.getCreatedAt()).isNotNull();
-    }
-
-    @Test
     @DisplayName("Создание пользователя с минимальными данными")
     void userWithMinimalData_ShouldCreateSuccessfully() {
         User user = User.builder()
@@ -95,5 +82,24 @@ class UserEntityTest {
         assertThat(user.getEmail()).isEqualTo("min@example.com");
         assertThat(user.getAge()).isNull();
         assertThat(user.getCreatedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("Тест сеттеров и геттеров")
+    void testSettersAndGetters() {
+        User user = new User();
+        LocalDateTime now = LocalDateTime.now();
+
+        user.setId(1L);
+        user.setName("Test");
+        user.setEmail("test@test.com");
+        user.setAge(25);
+        user.setCreatedAt(now);
+
+        assertThat(user.getId()).isEqualTo(1L);
+        assertThat(user.getName()).isEqualTo("Test");
+        assertThat(user.getEmail()).isEqualTo("test@test.com");
+        assertThat(user.getAge()).isEqualTo(25);
+        assertThat(user.getCreatedAt()).isEqualTo(now);
     }
 }

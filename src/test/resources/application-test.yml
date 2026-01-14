@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        javax:
+          persistence:
+            validation:
+              mode: NONE
+    generate-ddl: true
+
+  main:
+    banner-mode: off
+    web-application-type: servlet
+
+  output:
+    ansi:
+      enabled: never
+
+logging:
+  config: classpath:log4j2-test.xml
+
+testcontainers:
+  reuse:
+    enable: false
