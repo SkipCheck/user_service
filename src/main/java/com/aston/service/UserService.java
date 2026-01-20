@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final KafkaEventService kafkaEventService;
 
     /**
      * Преобразует сущность user в DTO UserResponse
@@ -66,6 +67,9 @@ public class UserService {
                 .build();
 
         user = userRepository.save(user);
+
+        // отправляем событие регистрации пользователя в кафку
+        kafkaEventService.sendUserCreatedEvent(user.getId(), user.getEmail(), user.getName());
 
         log.info("Пользователь создан: id={}, email={}", user.getId(), user.getEmail());
         return convertToResponse(user);
@@ -170,9 +174,13 @@ public class UserService {
     public void deleteUser(Long id) {
         log.info("Удаление пользователя с ID: {}", id);
 
-        if (!userRepository.existsById(id)) {
-            throw new UserException("Пользователь с ID " + id + " не найден");
-        }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserException("Пользователь с ID " + id + " не найден"));
+
+        String email = user.getEmail();
+        String name = user.getName();
+
+        kafkaEventService.sendUserDeletedEvent(id, email, name);
 
         userRepository.deleteById(id);
         log.info("Пользователь удален: ID={}", id);

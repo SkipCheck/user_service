@@ -9,7 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,7 +22,12 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -34,8 +41,17 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private UserService userService;
+    private static UserService userServiceMock;
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        @Primary
+        public UserService userService() {
+            userServiceMock = mock(UserService.class);
+            return userServiceMock;
+        }
+    }
 
     private UserRequest testUserRequest;
     private UserResponse testUserResponse;
@@ -60,7 +76,7 @@ class UserControllerTest {
     @Test
     @DisplayName("Создание пользователя")
     void createUser_ShouldReturnCreated() throws Exception {
-        when(userService.createUser(any(UserRequest.class))).thenReturn(testUserResponse);
+        when(userServiceMock.createUser(any(UserRequest.class))).thenReturn(testUserResponse);
 
         mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,51 +85,51 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Тестовый пользователь"));
 
-        verify(userService).createUser(any(UserRequest.class));
+        verify(userServiceMock).createUser(any(UserRequest.class));
     }
 
     @Test
     @DisplayName("Получение пользователя по ID")
     void getUserById_ShouldReturnUser() throws Exception {
-        when(userService.getUserById(anyLong())).thenReturn(testUserResponse);
+        when(userServiceMock.getUserById(anyLong())).thenReturn(testUserResponse);
 
         mockMvc.perform(get("/api/v1/users/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L));
 
-        verify(userService).getUserById(1L);
+        verify(userServiceMock).getUserById(1L);
     }
 
     @Test
     @DisplayName("Получение всех пользователей")
     void getAllUsers_ShouldReturnUsers() throws Exception {
         List<UserResponse> users = Arrays.asList(testUserResponse);
-        when(userService.getAllUsers()).thenReturn(users);
+        when(userServiceMock.getAllUsers()).thenReturn(users);
 
         mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value(1L));
 
-        verify(userService).getAllUsers();
+        verify(userServiceMock).getAllUsers();
     }
 
     @Test
     @DisplayName("Поиск пользователя по email")
     void getUserByEmail_ShouldReturnUser() throws Exception {
-        when(userService.getUserByEmail(anyString())).thenReturn(testUserResponse);
+        when(userServiceMock.getUserByEmail(anyString())).thenReturn(testUserResponse);
 
         mockMvc.perform(get("/api/v1/users/email/{email}", "test@example.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("test@example.com"));
 
-        verify(userService).getUserByEmail("test@example.com");
+        verify(userServiceMock).getUserByEmail("test@example.com");
     }
 
     @Test
     @DisplayName("Обновление пользователя")
     void updateUser_ShouldUpdateUser() throws Exception {
-        when(userService.updateUser(anyLong(), any(UserRequest.class))).thenReturn(testUserResponse);
+        when(userServiceMock.updateUser(anyLong(), any(UserRequest.class))).thenReturn(testUserResponse);
 
         mockMvc.perform(put("/api/v1/users/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -121,18 +137,18 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L));
 
-        verify(userService).updateUser(eq(1L), any(UserRequest.class));
+        verify(userServiceMock).updateUser(eq(1L), any(UserRequest.class));
     }
 
     @Test
     @DisplayName("Удаление пользователя")
     void deleteUser_ShouldDeleteUser() throws Exception {
-        doNothing().when(userService).deleteUser(anyLong());
+        doNothing().when(userServiceMock).deleteUser(anyLong());
 
         mockMvc.perform(delete("/api/v1/users/{id}", 1L))
                 .andExpect(status().isNoContent());
 
-        verify(userService).deleteUser(1L);
+        verify(userServiceMock).deleteUser(1L);
     }
 
     @Test
@@ -150,6 +166,6 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.details").exists());
 
-        verify(userService, never()).createUser(any(UserRequest.class));
+        verify(userServiceMock, never()).createUser(any(UserRequest.class));
     }
 }

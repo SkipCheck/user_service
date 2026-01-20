@@ -24,6 +24,13 @@ spring:
   main:
     banner-mode: off
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+kafka:
+  topics:
+    user-events: user-events-topic
+
 server:
   port: 5665
   servlet:
