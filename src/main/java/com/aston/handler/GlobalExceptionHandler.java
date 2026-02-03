@@ -1,5 +1,6 @@
-package com.aston.controller;
+package com.aston.handler;
 
+import com.aston.controller.ErrorResponse;
 import com.aston.exception.UserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

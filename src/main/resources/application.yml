@@ -24,6 +24,26 @@ spring:
   main:
     banner-mode: off
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+# Swagger конфигурация
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    display-request-duration: true
+    defaultModelsExpandDepth: 1
+    defaultModelExpandDepth: 1
+
+kafka:
+  topics:
+    user-events: user-events-topic
+
 server:
   port: 5665
   servlet:
@@ -34,5 +54,6 @@ logging:
     com.aston: INFO
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
+    org.springdoc: INFO
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

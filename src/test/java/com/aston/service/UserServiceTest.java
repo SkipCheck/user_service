@@ -31,6 +31,9 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private KafkaEventService kafkaEventService;
+
     private UserService userService;
 
     private User testUser;
@@ -38,7 +41,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository);
+        userService = new UserService(userRepository, kafkaEventService);
 
         testUser = User.builder()
                 .id(1L)
